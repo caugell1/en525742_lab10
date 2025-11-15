@@ -119,16 +119,41 @@ architecture arch_imp of full_radio_v1_0_S00_AXI is
 	signal byte_index	: integer;
 	signal aw_en	: std_logic;
 
-COMPONENT dds_compiler_0
-  PORT (
-    aclk : IN STD_LOGIC;
-    aresetn : IN STD_LOGIC;
-    s_axis_phase_tvalid : IN STD_LOGIC;
-    s_axis_phase_tdata : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
-    m_axis_data_tvalid : OUT STD_LOGIC;
-    m_axis_data_tdata : OUT STD_LOGIC_VECTOR(31 DOWNTO 0)
+--COMPONENT dds_compiler_0
+--  PORT (
+--    aclk : IN STD_LOGIC;
+--    aresetn : IN STD_LOGIC;
+--    s_axis_phase_tvalid : IN STD_LOGIC;
+--    s_axis_phase_tdata : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
+--    m_axis_data_tvalid : OUT STD_LOGIC;
+--    m_axis_data_tdata : OUT STD_LOGIC_VECTOR(31 DOWNTO 0)
+--  );
+--    END COMPONENT;
+
+  component lab8_dsp_0 is
+  port (
+    clk_0 : in STD_LOGIC;
+    dds_reset : in STD_LOGIC_VECTOR ( 0 to 0 );
+    resetn_0 : in STD_LOGIC;
+    timer_out : out STD_LOGIC_VECTOR ( 31 downto 0 );
+    M_AXIS_FILTERED_IMAGINARY_tdata : out STD_LOGIC_VECTOR ( 15 downto 0 );
+    M_AXIS_FILTERED_IMAGINARY_tready : in STD_LOGIC;
+    M_AXIS_FILTERED_IMAGINARY_tvalid : out STD_LOGIC;
+    M_AXIS_FILTERED_REAL_tdata : out STD_LOGIC_VECTOR ( 15 downto 0 );
+    M_AXIS_FILTERED_REAL_tvalid : out STD_LOGIC;
+    M_AXIS_FILTERED_REAL_tready : in STD_LOGIC;
+    fake_adc_PINC_tdata : in STD_LOGIC_VECTOR ( 31 downto 0 );
+    fake_adc_PINC_tready : out STD_LOGIC;
+    fake_adc_PINC_tvalid : in STD_LOGIC;
+    tuner_PINC_tdata : in STD_LOGIC_VECTOR ( 31 downto 0 );
+    tuner_PINC_tready : out STD_LOGIC;
+    tuner_PINC_tvalid : in STD_LOGIC
   );
-    END COMPONENT;
+  end component lab8_dsp_0;
+
+  signal m_axis_tvalid_i : std_logic;
+  signal m_axis_tvalid_q : std_logic;
+  signal w_timer_out: std_logic_vector (31 downto 0);
 
 begin
 	-- I/O Connections assignments
@@ -263,7 +288,8 @@ begin
 	              if ( S_AXI_WSTRB(byte_index) = '1' ) then
 	                -- Respective byte enables are asserted as per write strobes                   
 	                -- slave registor 3
-	                slv_reg3(byte_index*8+7 downto byte_index*8) <= S_AXI_WDATA(byte_index*8+7 downto byte_index*8);
+--	                slv_reg3(byte_index*8+7 downto byte_index*8) <= S_AXI_WDATA(byte_index*8+7 downto byte_index*8);
+	                slv_reg3(byte_index*8+7 downto byte_index*8) <= w_timer_out(7 downto 0);
 	              end if;
 	            end loop;
 	          when others =>
@@ -367,7 +393,7 @@ begin
 	      when b"00" =>
 	        reg_data_out <= slv_reg0;
 	      when b"01" =>
-	        reg_data_out <= x"DEADBEEF";
+	        reg_data_out <= slv_reg1;
 	      when b"10" =>
 	        reg_data_out <= slv_reg2;
 	      when b"11" =>
@@ -398,16 +424,37 @@ begin
 
 	-- Add user logic here
 
-your_instance_name : dds_compiler_0
-  PORT MAP (
-    aclk => s_axi_aclk,
-    aresetn => '1',
-    s_axis_phase_tvalid => '1',
-    s_axis_phase_tdata => slv_reg0,
-    m_axis_data_tvalid => m_axis_tvalid,
-    m_axis_data_tdata => m_axis_tdata
-  );
+--your_instance_name : dds_compiler_0
+--  PORT MAP (
+--    aclk => s_axi_aclk,
+--    aresetn => '1',
+--    s_axis_phase_tvalid => '1',
+--    s_axis_phase_tdata => slv_reg0,
+--    m_axis_data_tvalid => m_axis_tvalid,
+--    m_axis_data_tdata => m_axis_tdata
+--  );
 
+    m_axis_tvalid <= m_axis_tvalid_i or m_axis_tvalid_q;
+
+radio_dsp_i: component lab8_dsp_0
+     port map (
+      M_AXIS_FILTERED_IMAGINARY_tdata(15 downto 0) => m_axis_tdata(31 downto 16),
+      M_AXIS_FILTERED_IMAGINARY_tready => '1',
+      M_AXIS_FILTERED_IMAGINARY_tvalid => m_axis_tvalid_q,
+      M_AXIS_FILTERED_REAL_tdata(15 downto 0) =>  m_axis_tdata(15 downto 0),
+      M_AXIS_FILTERED_REAL_tready => '1',
+      M_AXIS_FILTERED_REAL_tvalid => m_axis_tvalid_i,
+      clk_0 => S_AXI_ACLK,
+      dds_reset(0) => slv_reg2(0),
+      fake_adc_PINC_tdata(31 downto 0) => slv_reg0,
+      fake_adc_PINC_tready => open,
+      fake_adc_PINC_tvalid => '1',
+      resetn_0 => S_AXI_ARESETN,
+      timer_out(31 downto 0) => w_timer_out,
+      tuner_PINC_tdata(31 downto 0) => slv_reg1,
+      tuner_PINC_tready => open,
+      tuner_PINC_tvalid => '1'
+    );
 
 	-- User logic ends
 
