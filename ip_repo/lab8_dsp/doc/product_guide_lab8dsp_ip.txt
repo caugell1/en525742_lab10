@@ -1,0 +1,6 @@
+Product Guide for lab8_dsp IP:
+This contains the following, and is intended for use in a software-defined radio.
+Fake-ADC DDS
+Tuner DDS
+Mixer/Complex Multiplier
+Filter chain to filter the tuned signal and reduce the data rate to 48ksps.

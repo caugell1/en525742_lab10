@@ -1,0 +1,1 @@
+This is the full packaged ip for lab 10, which includes the dsp ip from lab 8 as well as logic to handle register read/writes over AXI.
