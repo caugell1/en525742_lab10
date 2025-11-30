@@ -2,7 +2,7 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
-entity full_radio_v1_0_S00_AXI is
+entity full_radio_w_axis_fifo_S00_AXI is
 	generic (
 		-- Users to add parameters here
 
@@ -82,9 +82,9 @@ entity full_radio_v1_0_S00_AXI is
     		-- accept the read data and response information.
 		S_AXI_RREADY	: in std_logic
 	);
-end full_radio_v1_0_S00_AXI;
+end full_radio_w_axis_fifo_S00_AXI;
 
-architecture arch_imp of full_radio_v1_0_S00_AXI is
+architecture arch_imp of full_radio_w_axis_fifo_S00_AXI is
 
 	-- AXI4LITE signals
 	signal axi_awaddr	: std_logic_vector(C_S_AXI_ADDR_WIDTH-1 downto 0);
@@ -108,11 +108,13 @@ architecture arch_imp of full_radio_v1_0_S00_AXI is
 	------------------------------------------------
 	---- Signals for user logic register space example
 	--------------------------------------------------
-	---- Number of Slave Registers 4
+	---- Number of Slave Registers 6
 	signal slv_reg0	:std_logic_vector(C_S_AXI_DATA_WIDTH-1 downto 0);
 	signal slv_reg1	:std_logic_vector(C_S_AXI_DATA_WIDTH-1 downto 0);
 	signal slv_reg2	:std_logic_vector(C_S_AXI_DATA_WIDTH-1 downto 0);
 	signal slv_reg3	:std_logic_vector(C_S_AXI_DATA_WIDTH-1 downto 0);
+	-- signal slv_reg4	:std_logic_vector(C_S_AXI_DATA_WIDTH-1 downto 0);
+	-- signal slv_reg5	:std_logic_vector(C_S_AXI_DATA_WIDTH-1 downto 0);
 	signal slv_reg_rden	: std_logic;
 	signal slv_reg_wren	: std_logic;
 	signal reg_data_out	:std_logic_vector(C_S_AXI_DATA_WIDTH-1 downto 0);
@@ -154,6 +156,38 @@ architecture arch_imp of full_radio_v1_0_S00_AXI is
   signal m_axis_tvalid_i : std_logic;
   signal m_axis_tvalid_q : std_logic;
   signal w_timer_out: std_logic_vector (31 downto 0);
+ 
+  component module_fifo_regs_no_flags_0 is
+  generic (
+    g_WIDTH : natural := C_S_AXI_DATA_WIDTH;
+    g_DEPTH : integer := 256
+    );
+  port (
+    i_rst_sync : in std_logic;
+    i_clk      : in std_logic;
+ 
+    -- FIFO Write Interface
+    i_wr_en   : in  std_logic;
+    i_wr_data : in  std_logic_vector(g_WIDTH-1 downto 0);
+    o_full    : out std_logic;
+ 
+    -- FIFO Read Interface
+    i_rd_en   : in  std_logic;
+    o_rd_data : out std_logic_vector(g_WIDTH-1 downto 0);
+    o_count   : out std_logic_vector(g_WIDTH-1 downto 0);
+    o_empty   : out std_logic
+    );
+  end component module_fifo_regs_no_flags_0;
+
+  signal w_axis_fifo_full    : std_logic;
+  signal w_axis_fifo_data    : std_logic_vector(C_S_AXI_DATA_WIDTH-1 downto 0);
+  signal w_axis_fifo_count   : std_logic_vector(C_S_AXI_DATA_WIDTH-1 downto 0);
+  signal w_axis_fifo_isempty : std_logic;
+  signal w_axis_tdata        : std_logic_vector(C_S_AXI_DATA_WIDTH-1 downto 0);
+  signal S_AXI_ARESET        : std_logic := not S_AXI_ARESETN;
+  signal w_axis_tvalid       : std_logic;
+  signal w_axis_tready       : std_logic;
+  signal w_wr_en             : std_logic;
 
 begin
 	-- I/O Connections assignments
@@ -255,6 +289,8 @@ begin
 	      slv_reg1 <= (others => '0');
 	      slv_reg2 <= (others => '0');
 	      slv_reg3 <= (others => '0');
+	    --   slv_reg4 <= (others => '0');
+	    --   slv_reg5 <= (others => '0');
 	    else
 	      loc_addr := axi_awaddr(ADDR_LSB + OPT_MEM_ADDR_BITS downto ADDR_LSB);
 	      if (slv_reg_wren = '1') then
@@ -291,11 +327,29 @@ begin
 	                slv_reg3(byte_index*8+7 downto byte_index*8) <= S_AXI_WDATA(byte_index*8+7 downto byte_index*8);
 	              end if;
 	            end loop;
+	        --   when b"100" =>
+	        --     for byte_index in 0 to (C_S_AXI_DATA_WIDTH/8-1) loop
+	        --       if ( S_AXI_WSTRB(byte_index) = '1' ) then
+	        --         -- Respective byte enables are asserted as per write strobes                   
+	        --         -- slave registor 3
+	        --         slv_reg4(byte_index*8+7 downto byte_index*8) <= S_AXI_WDATA(byte_index*8+7 downto byte_index*8);
+	        --       end if;
+	        --     end loop;
+	        --   when b"101" =>
+	        --     for byte_index in 0 to (C_S_AXI_DATA_WIDTH/8-1) loop
+	        --       if ( S_AXI_WSTRB(byte_index) = '1' ) then
+	        --         -- Respective byte enables are asserted as per write strobes                   
+	        --         -- slave registor 3
+	        --         slv_reg5(byte_index*8+7 downto byte_index*8) <= S_AXI_WDATA(byte_index*8+7 downto byte_index*8);
+	        --       end if;
+	        --     end loop;
 	          when others =>
 	            slv_reg0 <= slv_reg0;
 	            slv_reg1 <= slv_reg1;
 	            slv_reg2 <= slv_reg2;
 	            slv_reg3 <= slv_reg3;
+	            -- slv_reg4 <= slv_reg4;
+	            -- slv_reg5 <= slv_reg5;
 	        end case;
 	      end if;
 	    end if;
@@ -392,11 +446,19 @@ begin
 	      when b"00" =>
 	        reg_data_out <= slv_reg0;
 	      when b"01" =>
-	        reg_data_out <= slv_reg1;
+	        reg_data_out <= w_axis_fifo_count;
+--	        reg_data_out <= slv_reg1;
 	      when b"10" =>
-	        reg_data_out <= slv_reg2;
+--	        reg_data_out <= slv_reg2;
+	        reg_data_out <= w_axis_fifo_data;
 	      when b"11" =>
 	        reg_data_out <= w_timer_out;
+-- 	      when b"100" =>
+-- --	        reg_data_out <= w_axis_fifo_count;
+-- 	        reg_data_out <= x"DADAFACE";
+-- 	      when b"101" =>
+-- --	        reg_data_out <= w_axis_fifo_data;
+-- 	        reg_data_out <= x"ABCDCAFE";
 	      when others =>
 	        reg_data_out  <= (others => '0');
 	    end case;
@@ -433,14 +495,41 @@ begin
 --    m_axis_data_tdata => m_axis_tdata
 --  );
 
-    m_axis_tvalid <= m_axis_tvalid_i or m_axis_tvalid_q;
+  axis_fifo : component module_fifo_regs_no_flags_0
+  generic map(
+    g_WIDTH => C_S_AXI_DATA_WIDTH,
+    g_DEPTH => 256
+    )
+  port map (
+    i_rst_sync => S_AXI_ARESET,
+    i_clk => S_AXI_ACLK,
+ 
+    -- FIFO Write Interface
+    i_wr_en => w_axis_tvalid,
+    i_wr_data => w_axis_tdata,
+    o_full => w_axis_fifo_full,
+ 
+    -- FIFO Read Interface
+    i_rd_en => w_axis_tready,
+    -- i_rd_en => slv_reg_rden,
+    o_rd_data => w_axis_fifo_data,
+    o_count => w_axis_fifo_count,
+    o_empty => w_axis_fifo_isempty
+    );
+
+    S_AXI_ARESET <= not S_AXI_ARESETN;
+    w_axis_tvalid <= m_axis_tvalid_i or m_axis_tvalid_q;
+	w_axis_tready <= (not w_axis_fifo_isempty) and axi_arready;
+    m_axis_tvalid <= w_axis_tvalid;
+    m_axis_tdata  <= w_axis_tdata;
+    w_wr_en <= '1' when w_axis_fifo_full = '0' else '0';
 
 radio_dsp_i: component lab8_dsp_0
      port map (
-      M_AXIS_FILTERED_IMAGINARY_tdata(15 downto 0) => m_axis_tdata(31 downto 16),
+      M_AXIS_FILTERED_IMAGINARY_tdata(15 downto 0) => w_axis_tdata(31 downto 16),
       M_AXIS_FILTERED_IMAGINARY_tready => '1',
       M_AXIS_FILTERED_IMAGINARY_tvalid => m_axis_tvalid_q,
-      M_AXIS_FILTERED_REAL_tdata(15 downto 0) =>  m_axis_tdata(15 downto 0),
+      M_AXIS_FILTERED_REAL_tdata(15 downto 0) =>  w_axis_tdata(15 downto 0),
       M_AXIS_FILTERED_REAL_tready => '1',
       M_AXIS_FILTERED_REAL_tvalid => m_axis_tvalid_i,
       clk_0 => S_AXI_ACLK,

@@ -2,32 +2,32 @@
   "schema": "xilinx.com:schema:json_instance:1.0",
   "ip_inst": {
     "xci_name": "lab8_dsp_0",
-    "cell_name": "full_radio_v1_0_S00_AXI_inst/radio_dsp_i",
+    "cell_name": "full_radio_w_axis_fifo_S00_AXI_inst/radio_dsp_i",
     "component_reference": "xilinx.com:user:lab8_dsp:1.0",
     "ip_revision": "3",
-    "gen_directory": ".",
+    "gen_directory": "../../../../vivado/radio_periph_lab.tmp/full_radio_v1_0_project/full_radio_v1_0_project.gen/sources_1/ip/lab8_dsp_0",
     "parameters": {
       "component_parameters": {
         "Component_Name": [ { "value": "lab8_dsp_0", "resolve_type": "user", "usage": "all" } ]
       },
       "project_parameters": {
-        "ARCHITECTURE": [ { "value": "zynq", "usage": "all" } ],
-        "BASE_BOARD_PART": [ { "value": "digilentinc.com:zybo-z7-20:part0:1.1", "usage": "all" } ],
-        "BOARD_CONNECTIONS": [ { "value": "", "usage": "all" } ],
-        "DEVICE": [ { "value": "xc7z020", "usage": "all" } ],
-        "PACKAGE": [ { "value": "clg400", "usage": "all" } ],
-        "PREFHDL": [ { "value": "VHDL", "usage": "all" } ],
-        "SILICON_REVISION": [ { "value": "", "usage": "all" } ],
-        "SIMULATOR_LANGUAGE": [ { "value": "MIXED", "usage": "all" } ],
-        "SPEEDGRADE": [ { "value": "-1", "usage": "all" } ],
-        "STATIC_POWER": [ { "value": "", "usage": "all" } ],
-        "TEMPERATURE_GRADE": [ { "value": "", "usage": "all" } ]
+        "ARCHITECTURE": [ { "value": "zynq" } ],
+        "BASE_BOARD_PART": [ { "value": "digilentinc.com:zybo-z7-20:part0:1.1" } ],
+        "BOARD_CONNECTIONS": [ { "value": "" } ],
+        "DEVICE": [ { "value": "xc7z020" } ],
+        "PACKAGE": [ { "value": "clg400" } ],
+        "PREFHDL": [ { "value": "VHDL" } ],
+        "SILICON_REVISION": [ { "value": "" } ],
+        "SIMULATOR_LANGUAGE": [ { "value": "MIXED" } ],
+        "SPEEDGRADE": [ { "value": "-1" } ],
+        "STATIC_POWER": [ { "value": "" } ],
+        "TEMPERATURE_GRADE": [ { "value": "" } ]
       },
       "runtime_parameters": {
         "IPCONTEXT": [ { "value": "IP_Flow" } ],
         "IPREVISION": [ { "value": "3" } ],
         "MANAGED": [ { "value": "TRUE" } ],
-        "OUTPUTDIR": [ { "value": "." } ],
+        "OUTPUTDIR": [ { "value": "../../../../vivado/radio_periph_lab.tmp/full_radio_v1_0_project/full_radio_v1_0_project.gen/sources_1/ip/lab8_dsp_0" } ],
         "SELECTEDSIMMODEL": [ { "value": "" } ],
         "SHAREDDIR": [ { "value": "." } ],
         "SWVERSION": [ { "value": "2024.2" } ],

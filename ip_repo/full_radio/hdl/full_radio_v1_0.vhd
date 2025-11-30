@@ -50,7 +50,7 @@ end full_radio_v1_0;
 architecture arch_imp of full_radio_v1_0 is
 
 	-- component declaration
-	component full_radio_v1_0_S00_AXI is
+	component full_radio_w_axis_fifo_S00_AXI is
 		generic (
 		C_S_AXI_DATA_WIDTH	: integer	:= 32;
 		C_S_AXI_ADDR_WIDTH	: integer	:= 4
@@ -80,13 +80,13 @@ architecture arch_imp of full_radio_v1_0 is
 		S_AXI_RVALID	: out std_logic;
 		S_AXI_RREADY	: in std_logic
 		);
-	end component full_radio_v1_0_S00_AXI;
+	end component full_radio_w_axis_fifo_S00_AXI;
 
 
 begin
 
 -- Instantiation of Axi Bus Interface S00_AXI
-full_radio_v1_0_S00_AXI_inst : full_radio_v1_0_S00_AXI
+full_radio_w_axis_fifo_S00_AXI_inst : full_radio_w_axis_fifo_S00_AXI
 	generic map (
 		C_S_AXI_DATA_WIDTH	=> C_S00_AXI_DATA_WIDTH,
 		C_S_AXI_ADDR_WIDTH	=> C_S00_AXI_ADDR_WIDTH
