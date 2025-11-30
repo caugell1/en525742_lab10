@@ -5,7 +5,7 @@ import socket
 # UDP_IP = "127.0.0.1"  # Example: localhost
 # UDP_PORT = 5005     # Example: a common port
 
-# UDP_IP = "192.168.100.77"  # Example: localhost
+# UDP_IP = "192.168.100.74"  # Example: localhost
 # UDP_PORT = 5005     # Example: a common port
 UDP_IP = sys.argv[1]
 in2 = sys.argv[2]
