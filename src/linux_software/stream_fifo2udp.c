@@ -66,7 +66,7 @@ int send_udp_packet(const char *UDP_IP, int UDP_PORT, const char *MESSAGE) {
     return 0;
 }
 
-int stream_fifo2udp_32bit(volatile unsigned int *ptrToRadio, const char *UDP_IP, int UDP_PORT, int num_packets)
+int stream_fifo2udp_32bit(volatile unsigned int *ptrToRadio, const char *UDP_IP, int UDP_PORT)
 {
     printf("Inside stream_fifo2udp_32bit\n");
     // u32 BaseAddress = 0x43c00000;
@@ -74,19 +74,12 @@ int stream_fifo2udp_32bit(volatile unsigned int *ptrToRadio, const char *UDP_IP,
     int latest_fifo_data; //dummy variable, actual values read will be trashed.
     int read_count = 0;
     int fifo_data_count = *(ptrToRadio+RADIO_AXIS_FIFO_COUNT_REG_OFFSET);
-    char buffer[8] = {"F"};
-    char *message = buffer;
+    char *message;
     // printf("Number of data items currently in the FIFO: %d\n\r", fifo_data_count);
     do {
         for(int ix = 0; ix < fifo_data_count; ix++) {
-            if (read_count > num_packets) {
-                break;
-            }
             latest_fifo_data = *(ptrToRadio+RADIO_AXIS_FIFO_DATA_REG_OFFSET);
             printf("latest_fifo_data = %7d\n\r", latest_fifo_data);
-            // int message_size = sprintf(buffer, "%d", latest_fifo_data);
-            // printf("message_size = %d\n\r", message_size);
-            // printf("message = %s with message_size %d\n\r", *message, message_size);
             message = (char *)(&latest_fifo_data);
             printf("message = %x\n\r", *message);
             int retval = send_udp_packet(UDP_IP, UDP_PORT, message);
@@ -110,7 +103,6 @@ int main(int argc, char *argv[])
 {
     const char *UDP_IP = argv[1];
     int UDP_PORT = atoi(argv[2]);
-    int num_packets = atoi(argv[3]);
 
 // first, get a pointer to the peripheral base address using /dev/mem and the function mmap
     volatile unsigned int *my_periph = get_a_pointer(RADIO_PERIPH_ADDRESS);	
@@ -119,10 +111,8 @@ int main(int argc, char *argv[])
     printf("\r\nInput arguments: \r\n");
     printf("\r\nUDP_IP = %s \r\n", UDP_IP);
     printf("\r\nUDP_PORT = %d \r\n", UDP_PORT);
-    printf("\r\nnum_packets = %d \r\n", num_packets);
     // *(my_periph+RADIO_TUNER_CONTROL_REG_OFFSET) = 0; // make sure radio isn't in reset
-    printf("\r\nNow %d data packets will be read from the FIFO and streamed over UDP...\n\r", num_packets);
-    stream_fifo2udp_32bit(my_periph, UDP_IP, UDP_PORT, num_packets);
+    stream_fifo2udp_32bit(my_periph, UDP_IP, UDP_PORT);
     printf("Finished!\n\r");
     return 0;
 }
