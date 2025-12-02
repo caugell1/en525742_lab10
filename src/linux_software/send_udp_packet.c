@@ -14,10 +14,6 @@
 //  root@zybo_linux:/run/media/SOC-mmcblk0p1# ./send_udp_packet 192.168.100.74 5005 10
 
 int send_udp_packet(const char *UDP_IP, int UDP_PORT, const char *MESSAGE) {
-    if (argc < 4) {
-        fprintf(stderr, "Usage: %s <UDP_IP> <UDP_PORT> <MESSAGE>\n", argv[0]);
-        return 1;
-    }
 
     // Create UDP socket
     int sock = socket(AF_INET, SOCK_DGRAM, 0);
@@ -51,5 +47,21 @@ int send_udp_packet(const char *UDP_IP, int UDP_PORT, const char *MESSAGE) {
     printf("UDP packet sent to %s:%d with message: %s\n", UDP_IP, UDP_PORT, MESSAGE);
 
     close(sock);
+    return 0;
+}
+
+int main(int argc, char *argv[])
+{
+    const char *UDP_IP = argv[1];
+    int UDP_PORT = atoi(argv[2]);
+    int num_packets = atoi(argv[3]);
+    printf("Streaming %d data packets over UDP...\n");
+    char *MESSAGE = "Hello, UDP!";
+    for (int i = 0; i < num_packets; i++) {
+        // Message to send
+        MESSAGE = itoa(i);
+        send_udp_packet(UDP_IP, UDP_PORT, MESSAGE);
+    }
+    printf("Finished!\n");
     return 0;
 }

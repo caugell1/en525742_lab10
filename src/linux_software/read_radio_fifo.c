@@ -52,38 +52,8 @@ int read_fifo_32bit(volatile unsigned int *ptrToRadio)
     return 0;
 }
 
-int stream_fifo2udp_32bit(volatile unsigned int *ptrToRadio, const char *UDP_IP, int UDP_PORT, int num_packets)
-{
-    printf("Inside stream_fifo2udp_32bit\n");
-    // u32 BaseAddress = 0x43c00000;
-    int space_available = 0;
-    int latest_fifo_data; //dummy variable, actual values read will be trashed.
-    int read_count = 0;
-    int fifo_data_count = *(ptrToRadio+RADIO_AXIS_FIFO_COUNT_REG_OFFSET);
-    // printf("Number of data items currently in the FIFO: %d\n\r", fifo_data_count);
-    do {
-        for(int ix = 0; ix < fifo_data_count; ix++) {
-            if (read_count > num_packets) {
-                break;
-            }
-            latest_fifo_data = *(ptrToRadio+RADIO_AXIS_FIFO_DATA_REG_OFFSET);
-            // printf("%7d \t", latest_fifo_data);
-            int retval = send_udp_packet(UDP_IP, UDP_PORT, latest_fifo_data);
-            if(retval != 0) {
-                return 1;
-            }
-            read_count += 1;
-        }
-        fifo_data_count = *(ptrToRadio+RADIO_AXIS_FIFO_COUNT_REG_OFFSET);
-        // printf("Number of data items currently in the FIFO: %d\n\r", fifo_data_count);
-    } while(1);
-    printf("Total number of data items read from FIFO and streamed over UDP: %d\n\r", read_count);
-    return 0;
-}
-
 int main(int argc, char *argv[])
 {
-
     const char *UDP_IP = argv[1];
     int UDP_PORT = atoi(argv[2]);
     int num_packets = atoi(argv[3]);
@@ -95,7 +65,6 @@ int main(int argc, char *argv[])
     // *(my_periph+RADIO_TUNER_CONTROL_REG_OFFSET) = 0; // make sure radio isn't in reset
     printf("Hello, I am going to read 10 seconds worth of data now...\n");
     read_fifo_32bit(my_periph);
-    stream_fifo2udp_32bit(my_periph, UDP_IP, UDP_PORT, num_packets);
     printf("Finished!\n");
     return 0;
 }
