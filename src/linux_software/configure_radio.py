@@ -1,0 +1,36 @@
+#! /usr/bin/python3
+import cgi, cgitb
+import sys
+import subprocess
+import os
+
+# Create instance of FieldStorage
+form = cgi.FieldStorage()
+
+# Get data from fields
+adc_freq_hz  = int(form.getvalue('adc_freq_hz'))
+tune_freq_hz  = int(form.getvalue('tune_freq_hz'))
+streaming = form.getvalue('streaming')
+
+
+# Send the result to the browser
+print ("Content-type:text/html")
+print()
+print ("<html>")
+print ('<head>')
+print ("<title>Radio Configurator</title>")
+print ('</head>')
+print ('<body>')
+print ("<h2>Radio Configurator</h2>")
+print ("Setting up the radio now...")
+print ("ADC Freq = %d, Tune Freq = %d" %(adc_freq_hz,tune_freq_hz))
+os.system("devmem 0x43c00000 w %d" %(adc_freq_hz))
+os.system("devmem 0x43c00004 w %d" %(tune_freq_hz))
+if (streaming == "streaming"):
+    os.system("devmem 0x43c00018 w 1")
+    print ("streaming is Enabled<br>")
+else :
+    os.system("devmem 0x43c00018 w 0")
+    print ("streaming is Disabled<br>")
+print ('</body>')
+print ('</html>')

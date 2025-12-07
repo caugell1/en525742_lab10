@@ -73,11 +73,11 @@ int stream_fifo2udp_32bit(volatile unsigned int *ptrToRadio, const char *UDP_IP,
     int space_available = 0;
     int latest_fifo_data; //dummy variable, actual values read will be trashed.
     int read_count = 0;
-    int fifo_data_count = *(ptrToRadio+RADIO_AXIS_FIFO_COUNT_REG_OFFSET);
+    // int fifo_data_count = *(ptrToRadio+RADIO_AXIS_FIFO_COUNT_REG_OFFSET);
     char *message;
     // printf("Number of data items currently in the FIFO: %d\n\r", fifo_data_count);
     do {
-        for(int ix = 0; ix < fifo_data_count; ix++) {
+        // for(int ix = 0; ix < fifo_data_count; ix++) {
             latest_fifo_data = *(ptrToRadio+RADIO_AXIS_FIFO_DATA_REG_OFFSET);
             printf("latest_fifo_data = %7d\n\r", latest_fifo_data);
             message = (char *)(&latest_fifo_data);
@@ -87,8 +87,8 @@ int stream_fifo2udp_32bit(volatile unsigned int *ptrToRadio, const char *UDP_IP,
                 return 1;
             }
             read_count += 1;
-        }
-        fifo_data_count = *(ptrToRadio+RADIO_AXIS_FIFO_COUNT_REG_OFFSET);
+        // }
+        // fifo_data_count = *(ptrToRadio+RADIO_AXIS_FIFO_COUNT_REG_OFFSET);
         // printf("Number of data items currently in the FIFO: %d\n\r", fifo_data_count);
     } while(1);
     printf("Total number of data items read from FIFO and streamed over UDP: %d\n\r", read_count);
@@ -98,7 +98,7 @@ int stream_fifo2udp_32bit(volatile unsigned int *ptrToRadio, const char *UDP_IP,
 // UDP_IP = "192.168.100.74"  # Example: localhost
 // UDP_PORT = 5005     # Example: a common port
 // Example: 
-//  root@zybo_linux:/run/media/SOC-mmcblk0p1# ./stream_fifo2udp 192.168.100.74 5005 10
+//  root@zybo_linux:/run/media/SOC-mmcblk0p1# ./stream_fifo2udp 192.168.100.74 5005
 int main(int argc, char *argv[])
 {
     const char *UDP_IP = argv[1];
