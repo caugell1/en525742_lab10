@@ -1,8 +1,8 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <sys/mman.h> 
 #include <fcntl.h> 
 #include <unistd.h>
-#include "send_udp_packet.c"
 #define _BSD_SOURCE
 
 #define RADIO_TUNER_FAKE_ADC_PINC_OFFSET 0
