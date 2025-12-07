@@ -187,7 +187,7 @@ architecture arch_imp of full_radio_w_axis_fifo_S00_AXI is
   signal S_AXI_ARESET        : std_logic := not S_AXI_ARESETN;
   signal w_axis_tvalid       : std_logic;
   signal w_axis_tready       : std_logic;
-  signal w_wr_en             : std_logic;
+  signal w_wr_en             : std_logic := '1';
 
 begin
 	-- I/O Connections assignments
@@ -446,13 +446,14 @@ begin
 	      when b"00" =>
 	        reg_data_out <= slv_reg0;
 	      when b"01" =>
-	        reg_data_out <= w_axis_fifo_count;
---	        reg_data_out <= slv_reg1;
+	        -- reg_data_out <= w_axis_fifo_count;
+	        reg_data_out <= slv_reg1;
 	      when b"10" =>
 --	        reg_data_out <= slv_reg2;
 	        reg_data_out <= w_axis_fifo_data;
 	      when b"11" =>
-	        reg_data_out <= w_timer_out;
+	        reg_data_out <= slv_reg3;
+	        -- reg_data_out <= w_timer_out;
 -- 	      when b"100" =>
 -- --	        reg_data_out <= w_axis_fifo_count;
 -- 	        reg_data_out <= x"DADAFACE";
@@ -505,7 +506,7 @@ begin
     i_clk => S_AXI_ACLK,
  
     -- FIFO Write Interface
-    i_wr_en => w_axis_tvalid,
+    i_wr_en => w_wr_en,
     i_wr_data => w_axis_tdata,
     o_full => w_axis_fifo_full,
  
@@ -522,7 +523,8 @@ begin
 	w_axis_tready <= (not w_axis_fifo_isempty) and axi_arready;
     m_axis_tvalid <= w_axis_tvalid;
     m_axis_tdata  <= w_axis_tdata;
-    w_wr_en <= '1' when w_axis_fifo_full = '0' else '0';
+    -- w_wr_en <= '1' when ((w_axis_fifo_full = '0') and (w_axis_tvalid = '1') and (slv_reg3(0 downto 0) = x"1")) else '0';
+    w_wr_en <= '1' when not (slv_reg3 = x"00000000") else '0';
 
 radio_dsp_i: component lab8_dsp_0
      port map (

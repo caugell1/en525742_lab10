@@ -27,10 +27,10 @@ print ("ADC Freq = %d, Tune Freq = %d" %(adc_freq_hz,tune_freq_hz))
 os.system("devmem 0x43c00000 w %d" %(adc_freq_hz))
 os.system("devmem 0x43c00004 w %d" %(tune_freq_hz))
 if (streaming == "streaming"):
-    os.system("devmem 0x43c00018 w 1")
+    os.system("devmem 0x43c0000c w 1")
     print ("streaming is Enabled<br>")
 else :
-    os.system("devmem 0x43c00018 w 0")
+    os.system("devmem 0x43c0000c w 0")
     print ("streaming is Disabled<br>")
 print ('</body>')
 print ('</html>')
